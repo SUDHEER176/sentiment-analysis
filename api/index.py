@@ -4,14 +4,24 @@ import os
 import numpy as np
 import time
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+# Get the correct paths for Vercel deployment
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+template_dir = os.path.join(base_dir, 'templates')
+static_dir = os.path.join(base_dir, 'static')
+
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 # Load models using joblib (more robust than pickle)
+model_path = os.path.join(base_dir, "best_model.pkl")
+vectorizer_path = os.path.join(base_dir, "tfidf_vectorizer.pkl")
+
 try:
-    model = joblib.load("best_model.pkl")
-    vectorizer = joblib.load("tfidf_vectorizer.pkl")
+    model = joblib.load(model_path)
+    vectorizer = joblib.load(vectorizer_path)
 except Exception as e:
     print(f"Error loading models: {e}")
+    print(f"Looking for model at: {model_path}")
+    print(f"Looking for vectorizer at: {vectorizer_path}")
     model = None
     vectorizer = None
 
