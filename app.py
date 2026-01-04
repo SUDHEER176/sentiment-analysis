@@ -9,22 +9,41 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Get base directory for absolute paths (crucial for Vercel)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default-secret-key")
 
 # Supabase configuration
-url: str = os.getenv("SUPABASE_URL")
-key: str = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
 
-# Load models using joblib
+# Initialize supabase client safely
+supabase = None
+if supabase_url and supabase_key:
+    try:
+        supabase = create_client(supabase_url, supabase_key)
+    except Exception as e:
+        print(f"Error initializing Supabase: {e}")
+else:
+    print("Warning: SUPABASE_URL or SUPABASE_KEY missing from environment variables.")
+
+# Load models using absolute paths
+model = None
+vectorizer = None
+
 try:
-    model = joblib.load("best_model.pkl")
-    vectorizer = joblib.load("tfidf_vectorizer.pkl")
+    model_path = os.path.join(BASE_DIR, "best_model.pkl")
+    vectorizer_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
+    
+    if os.path.exists(model_path) and os.path.exists(vectorizer_path):
+        model = joblib.load(model_path)
+        vectorizer = joblib.load(vectorizer_path)
+    else:
+        print(f"Model files not found at: {model_path} or {vectorizer_path}")
 except Exception as e:
     print(f"Error loading models: {e}")
-    model = None
-    vectorizer = None
 
 @app.route("/")
 def intro():
@@ -90,23 +109,31 @@ def index():
         review_text = request.form["review"]
         if not review_text.strip():
             sentiment_result = "Please enter some text"
+        elif model is None or vectorizer is None:
+            sentiment_result = "Model Error: AI engine is not ready."
+            sentiment_color = "gray"
         else:
             time.sleep(0.5)
-            transformed_text = vectorizer.transform([review_text])
-            prediction = model.predict(transformed_text)[0]
-            probabilities = model.predict_proba(transformed_text)[0]
-            confidence = max(probabilities) * 100
-            
-            sentiment_map = {
-                'positive': ('Positive', '#22c55e'),
-                'negative': ('Negative', '#ef4444'),
-                'neutral': ('Neutral', '#6b7280')
-            }
-            
-            if prediction in sentiment_map:
-                sentiment_result, sentiment_color = sentiment_map[prediction]
-            else:
-                sentiment_result = "Unknown"
+            try:
+                transformed_text = vectorizer.transform([review_text])
+                prediction = model.predict(transformed_text)[0]
+                probabilities = model.predict_proba(transformed_text)[0]
+                confidence = max(probabilities) * 100
+                
+                sentiment_map = {
+                    'positive': ('Positive', '#22c55e'),
+                    'negative': ('Negative', '#ef4444'),
+                    'neutral': ('Neutral', '#6b7280')
+                }
+                
+                if prediction in sentiment_map:
+                    sentiment_result, sentiment_color = sentiment_map[prediction]
+                else:
+                    sentiment_result = "Unknown"
+                    sentiment_color = "gray"
+            except Exception as e:
+                print(f"Prediction error: {e}")
+                sentiment_result = "Analysis failed. Please try again."
                 sentiment_color = "gray"
 
     return render_template("index.html", 
