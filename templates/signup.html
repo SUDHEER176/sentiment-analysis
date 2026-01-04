@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | SentiAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-deep">
+    <div class="bg-beams">
+        <div class="beam" style="left: 40%; height: 100vh; opacity: 0.1;"></div>
+        <div class="beam" style="left: 80%; animation: float 15s infinite reverse;"></div>
+    </div>
+
+    <header class="site-header">
+        <div class="nav-container">
+            <a href="/" class="logo-container">
+                <div class="logo-icon">
+                    <i data-lucide="lightbulb" style="color: #000; width: 1.5rem; height: 1.5rem;"></i>
+                </div>
+                <span class="logo-text">SentiAI</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="section-container"
+        style="display: flex; justify-content: center; align-items: center; min-height: 80vh;">
+        <div class="analysis-input-card" style="max-width: 450px; width: 100%;">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Get Started</h2>
+                <p style="color: var(--text-muted);">Create your free SentiAI account</p>
+            </div>
+
+            {% if error %}
+            <div
+                style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if success %}
+            <div
+                style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                {{ success }}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label-premium" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="textarea-premium"
+                        style="min-height: auto; padding: 1rem;" placeholder="name@example.com" required>
+                </div>
+                <div style="margin-bottom: 1.5rem;">
+                    <label class="form-label-premium" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="textarea-premium"
+                        style="min-height: auto; padding: 1rem;" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn-analyze-premium" style="margin-bottom: 1.5rem;">
+                    Create Account
+                </button>
+            </form>
+
+            <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem;">
+                Already have an account? <a href="/login"
+                    style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign In</a>
+            </p>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
