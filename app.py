@@ -13,11 +13,11 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
-app.secret_key = os.getenv("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eWpvcXZ2Ynl1cHJ6cnVpemhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NDM3NTksImV4cCI6MjA4MzExOTc1OX0.DpOmabu7H6JzzV8rIq4biG3K0EcyTl6iTOK_0MAjVyA", "default-secret-key")
+app.secret_key = os.getenv("SECRET_KEY", "default-secret-key")
 
 # Supabase configuration
-supabase_url = os.getenv("https://dwyjoqvvbyuprzruizhi.supabase.co")
-supabase_key = os.getenv("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eWpvcXZ2Ynl1cHJ6cnVpemhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NDM3NTksImV4cCI6MjA4MzExOTc1OX0.DpOmabu7H6JzzV8rIq4biG3K0EcyTl6iTOK_0MAjVyA")
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
 
 # Initialize supabase client safely
 supabase = None
@@ -52,6 +52,9 @@ def intro():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+    if supabase is None:
+        return render_template("signup.html", error="Supabase client is not initialized. Please check your environment variables.")
+    
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
@@ -65,11 +68,15 @@ def signup():
             })
             return render_template("signup.html", success="Verification email sent! Please check your inbox.")
         except Exception as e:
+            print(f"Signup error: {e}")
             return render_template("signup.html", error=str(e))
     return render_template("signup.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if supabase is None:
+        return render_template("login.html", error="Supabase client is not initialized. Please check your environment variables.")
+
     if request.method == "POST":
         email = request.form.get("email")
         password = request.form.get("password")
@@ -91,7 +98,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-    supabase.auth.sign_out()
+    if supabase:
+        supabase.auth.sign_out()
     session.pop("user", None)
     return redirect(url_for("intro"))
 
