@@ -83,8 +83,9 @@
           {% if sentiment %}
           <div id="resultContainer" class="result-card-premium">
             <h3 style="text-align: center; margin-bottom: 2rem;">Analysis Complete</h3>
-            <div class="sentiment-badge-premium" style="background: {{ color }}15; border: 1px solid {{ color }}30;">
-              <h2 style="color: {{ color }}; font-size: 3rem; letter-spacing: 0.05em;">{{ sentiment }}</h2>
+            <div class="sentiment-badge-premium"
+              style="background: {{ color or '#6b7280' }}15; border: 1px solid {{ color or '#6b7280' }}30;">
+              <h2 style="color: {{ color or '#6b7280' }}; font-size: 3rem; letter-spacing: 0.05em;">{{ sentiment }}</h2>
             </div>
             <div class="confidence-section">
               <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">

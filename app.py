@@ -13,11 +13,11 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "default-secret-key")
+app.secret_key = os.getenv("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eWpvcXZ2Ynl1cHJ6cnVpemhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NDM3NTksImV4cCI6MjA4MzExOTc1OX0.DpOmabu7H6JzzV8rIq4biG3K0EcyTl6iTOK_0MAjVyA", "default-secret-key")
 
 # Supabase configuration
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_KEY")
+supabase_url = os.getenv("https://dwyjoqvvbyuprzruizhi.supabase.co")
+supabase_key = os.getenv("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3eWpvcXZ2Ynl1cHJ6cnVpemhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1NDM3NTksImV4cCI6MjA4MzExOTc1OX0.DpOmabu7H6JzzV8rIq4biG3K0EcyTl6iTOK_0MAjVyA")
 
 # Initialize supabase client safely
 supabase = None
@@ -103,7 +103,7 @@ def index():
 
     sentiment_result = None
     confidence = None
-    sentiment_color = None
+    sentiment_color = "#6b7280"  # Default gray
 
     if request.method == "POST":
         review_text = request.form["review"]
@@ -111,7 +111,7 @@ def index():
             sentiment_result = "Please enter some text"
         elif model is None or vectorizer is None:
             sentiment_result = "Model Error: AI engine is not ready."
-            sentiment_color = "gray"
+            sentiment_color = "#6b7280"
         else:
             time.sleep(0.5)
             try:
@@ -130,11 +130,11 @@ def index():
                     sentiment_result, sentiment_color = sentiment_map[prediction]
                 else:
                     sentiment_result = "Unknown"
-                    sentiment_color = "gray"
+                    sentiment_color = "#6b7280"
             except Exception as e:
                 print(f"Prediction error: {e}")
                 sentiment_result = "Analysis failed. Please try again."
-                sentiment_color = "gray"
+                sentiment_color = "#6b7280"
 
     return render_template("index.html", 
                          sentiment=sentiment_result,
