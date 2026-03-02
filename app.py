@@ -4,10 +4,16 @@ import os
 import numpy as np
 import time
 
-# Get base directory for absolute paths (crucial for Vercel)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Get the correct base directory - works for both local and Vercel
+if os.path.exists(os.path.join(os.getcwd(), 'best_model.pkl')):
+    BASE_DIR = os.getcwd()
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-app = Flask(__name__)
+# Configure Flask with proper paths
+app = Flask(__name__, 
+            template_folder=os.path.join(BASE_DIR, 'templates'),
+            static_folder=os.path.join(BASE_DIR, 'static'))
 
 # Load models using absolute paths
 model = None
@@ -17,13 +23,20 @@ try:
     model_path = os.path.join(BASE_DIR, "best_model.pkl")
     vectorizer_path = os.path.join(BASE_DIR, "tfidf_vectorizer.pkl")
     
+    print(f"Looking for models in: {BASE_DIR}")
+    print(f"Model path: {model_path}, exists: {os.path.exists(model_path)}")
+    print(f"Vectorizer path: {vectorizer_path}, exists: {os.path.exists(vectorizer_path)}")
+    
     if os.path.exists(model_path) and os.path.exists(vectorizer_path):
         model = joblib.load(model_path)
         vectorizer = joblib.load(vectorizer_path)
+        print("Models loaded successfully!")
     else:
         print(f"Model files not found at: {model_path} or {vectorizer_path}")
 except Exception as e:
     print(f"Error loading models: {e}")
+    import traceback
+    traceback.print_exc()
 
 @app.route("/", methods=["GET", "POST"])
 def index():
