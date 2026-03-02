@@ -1,33 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request
 import joblib
 import os
 import numpy as np
 import time
-from supabase import create_client, Client
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
 
 # Get base directory for absolute paths (crucial for Vercel)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "default-secret-key")
-
-# Supabase configuration
-supabase_url = os.getenv("SUPABASE_URL")
-supabase_key = os.getenv("SUPABASE_KEY")
-
-# Initialize supabase client safely
-supabase = None
-if supabase_url and supabase_key:
-    try:
-        supabase = create_client(supabase_url, supabase_key)
-    except Exception as e:
-        print(f"Error initializing Supabase: {e}")
-else:
-    print("Warning: SUPABASE_URL or SUPABASE_KEY missing from environment variables.")
 
 # Load models using absolute paths
 model = None
@@ -45,69 +25,8 @@ try:
 except Exception as e:
     print(f"Error loading models: {e}")
 
-@app.route("/")
-def intro():
-    # If user is logged in, you might want to show their email or a dashboard link
-    return render_template("intro.html", user=session.get("user"))
-
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-    if supabase is None:
-        return render_template("signup.html", error="Supabase client is not initialized. Please check your environment variables.")
-    
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-        try:
-            # Tell Supabase where to redirect after email confirmation
-            redirect_url = request.host_url.rstrip('/') + "/login"
-            res = supabase.auth.sign_up({
-                "email": email, 
-                "password": password,
-                "options": {"email_redirect_to": redirect_url}
-            })
-            return render_template("signup.html", success="Verification email sent! Please check your inbox.")
-        except Exception as e:
-            print(f"Signup error: {e}")
-            return render_template("signup.html", error=str(e))
-    return render_template("signup.html")
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if supabase is None:
-        return render_template("login.html", error="Supabase client is not initialized. Please check your environment variables.")
-
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
-        try:
-            res = supabase.auth.sign_in_with_password({"email": email, "password": password})
-            session["user"] = {
-                "id": res.user.id,
-                "email": res.user.email
-            }
-            # Redirect to the main analyze page after successful login
-            return redirect(url_for("index"))
-        except Exception as e:
-            # Provide more specific error feedback
-            error_msg = str(e)
-            if "Invalid login credentials" in error_msg:
-                error_msg = "Invalid email or password. Please try again."
-            return render_template("login.html", error=error_msg)
-    return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    if supabase:
-        supabase.auth.sign_out()
-    session.pop("user", None)
-    return redirect(url_for("intro"))
-
-@app.route("/analyze", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    # Enforce login
-    if "user" not in session:
-        return redirect(url_for("login"))
 
     sentiment_result = None
     confidence = None
@@ -147,8 +66,7 @@ def index():
     return render_template("index.html", 
                          sentiment=sentiment_result,
                          confidence=confidence,
-                         color=sentiment_color,
-                         user=session.get("user"))
+                         color=sentiment_color)
 
 if __name__ == "__main__":
     app.run(debug=True)

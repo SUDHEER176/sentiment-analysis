@@ -30,13 +30,6 @@
         <a href="#" class="nav-link">Docs</a>
       </nav>
       <div class="nav-auth">
-        {% if user %}
-        <span style="color: var(--text-muted); font-size: 0.9rem; margin-right: 1rem;">{{ user.email }}</span>
-        <a href="/logout" class="btn-signin">Sign Out</a>
-        {% else %}
-        <a href="/login" class="btn-signin">Sign In</a>
-        <a href="/signup" class="btn-getstarted">Get Started</a>
-        {% endif %}
       </div>
     </div>
   </header>
@@ -58,7 +51,7 @@
             </div>
           </div>
 
-          <form id="sentimentForm" method="POST">
+          <form id="sentimentForm" method="POST" action="/">
             <label class="form-label-premium" for="reviewText">Enter Review Text</label>
             <textarea id="reviewText" name="review" class="textarea-premium"
               placeholder="Type your product review here..." required></textarea>
